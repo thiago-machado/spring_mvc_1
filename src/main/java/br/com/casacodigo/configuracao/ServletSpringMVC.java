@@ -1,5 +1,8 @@
 package br.com.casacodigo.configuracao;
 
+import javax.servlet.Filter;
+
+import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
 /**
@@ -21,12 +24,15 @@ public class ServletSpringMVC extends AbstractAnnotationConfigDispatcherServletI
 	/*
 	 * Configuração para que o Spring conheça nosso Controller.
 	 * Estamos difinindo que a classe AppWebConfiguration será usada 
-	 * como classe de configuração do servlet do SpringMVC
+	 * como classe de configuração do servlet do SpringMVC.
+	 * 
+	 * Estamos também dizendo ao Spring que a classe JPAConfiguracao
+	 * deve ser reconhecida.
 	 * 
 	 */
 	@Override
 	protected Class<?>[] getServletConfigClasses() {
-		return new Class[] { AppWebConfiguration.class };
+		return new Class[] { AppWebConfiguration.class, JPAConfiguracao.class };
 	}
 
 	/*
@@ -39,6 +45,16 @@ public class ServletSpringMVC extends AbstractAnnotationConfigDispatcherServletI
 		 * Estamos definindo que queremos mapear do "/" em diante
 		 */
 		return new String[] {"/"};
+	}
+	
+	/*
+	 * Definindo o UFT-8 para toda a aplicação
+	 */
+	@Override
+	protected Filter[] getServletFilters() {
+		CharacterEncodingFilter encoding = new CharacterEncodingFilter();
+		encoding.setEncoding("UTF-8");
+		return new Filter[] { encoding };
 	}
 
 }

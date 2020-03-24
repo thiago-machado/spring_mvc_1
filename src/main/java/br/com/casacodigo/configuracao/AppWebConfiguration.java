@@ -6,6 +6,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import br.com.casacodigo.controller.HomeController;
+import br.com.casacodigo.model.dao.ProdutoDAO;
 
 /*
  * @EnableWebMvc = estamos utilizando a parte WEB MVC do Spring
@@ -14,10 +15,13 @@ import br.com.casacodigo.controller.HomeController;
  * Controllers, podemos fazer de uma das duas formas:
  * 1) (basePackages = "pacote")
  * 2) (basePackageClasses = MinhaClasseController.class)
+ * 
+ * ProdutoDAO foi inserido para que o Spring reconheça as injeções do pacote dao
  */
+
+//O Spring vai pegar o pacote HomeController para fazer o mapeamento do Controller
 @EnableWebMvc
-@ComponentScan(basePackageClasses = { HomeController.class }) // O Spring vai pegar o pacote HomeController para fazer o
-																// mapeamento do Controller
+@ComponentScan(basePackageClasses = { HomeController.class, ProdutoDAO.class }) 
 public class AppWebConfiguration {
 
 	/*
