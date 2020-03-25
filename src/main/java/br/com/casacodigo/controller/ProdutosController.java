@@ -2,8 +2,13 @@ package br.com.casacodigo.controller;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
@@ -12,6 +17,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import br.com.casacodigo.model.Produto;
 import br.com.casacodigo.model.TipoPreco;
 import br.com.casacodigo.model.dao.ProdutoDAO;
+import br.com.casacodigo.validacao.ProdutoValidacao;
 
 /*
  * Definindo URL padrão inicial para todos os mapeamentos feitos na classe.
@@ -22,6 +28,23 @@ import br.com.casacodigo.model.dao.ProdutoDAO;
 @Controller
 @RequestMapping("produtos")
 public class ProdutosController {
+
+	/*
+	 * Agora precisamos criar um método em nosso controller chamado InitBinder que
+	 * terá uma anotação com o mesmo nome do método @InitBinder. Este método
+	 * recebera um objeto do tipo WebDataBinder que chamaremos apenas de binder. O
+	 * objeto binder tem um médoto chamado addValidators que recebe uma instância de
+	 * uma classe que implemente a interface Validator do pacote
+	 * org.springframwork.validation.
+	 * 
+	 * Observação: O Binder, por assim dizer, é o responsável por conectar duas
+	 * coisas. Por exemplo, conectar nosso "@Valid Produto" com nossa validação em
+	 * ProdutoValidacao.
+	 */
+	@InitBinder
+	public void initBinder(WebDataBinder binder) {
+		binder.addValidators(new ProdutoValidacao());
+	}
 
 	/*
 	 * A anotação @Autowired serve para que nós não nos preocupemos em criar
@@ -97,11 +120,28 @@ public class ProdutosController {
 	 * interessante observar. Eles só duram até a próxima requisição, ou seja,
 	 * transportam informações de uma requisição para a outra e, então, deixam de
 	 * existir.
+	 * 
+	 * 
+	 * @Valid = O Spring realizará a validação e informará o usuário na página.
+	 * 
+	 * 
+	 * BindingResult = Falta recebermos o resultado da verificação, da validação em
+	 * sí em nosso controller e verificar se houve algum erro. Faremos isto
+	 * recebendo na assinatura do nosso método gravar um objeto do tipo
+	 * BindingResult que tem um método chamado hasErrors, que informa se houve erros
+	 * de validação ou não.
+	 * 
+	 * Note que o BindingResult vem logo após o atributo que está assinado com a
+	 * anotação @Valid, essa ordem não é por acaso, precisa ser desta forma para que
+	 * o Spring consiga fazer as validações da forma correta.
 	 */
 	@RequestMapping(method = RequestMethod.POST)
-	public ModelAndView gravar(Produto produto, RedirectAttributes redirectAttributes) {
+	public ModelAndView gravar(@Valid Produto produto, BindingResult result, RedirectAttributes redirectAttributes) {
 
-		System.out.println(produto);
+		if (result.hasErrors()) {
+			return form();
+		}
+		
 		produtoDAO.gravar(produto);
 
 		redirectAttributes.addFlashAttribute("sucesso", "Produto cadastrado!");
