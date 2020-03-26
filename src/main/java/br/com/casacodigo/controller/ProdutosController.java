@@ -26,7 +26,7 @@ import br.com.casacodigo.validacao.ProdutoValidacao;
  * Os métodos que não possuem requestmapping utilizará a URL padrão.
  */
 @Controller
-@RequestMapping("produtos")
+@RequestMapping("/produtos")
 public class ProdutosController {
 
 	/*
@@ -69,11 +69,29 @@ public class ProdutosController {
 	 */
 
 	/*
-	 * @RequestMapping("produtos/form") public String form() { return
-	 * "produtos/form"; }
+	 * @RequestMapping("produtos/form") 
+	 * public String form() { 
+	 * return "produtos/form"; 
+	 * }
+	 */
+	
+	/*
+	 * O Spring tenta usar um objeto da classe Produto para poder exibir no formulário. 
+	 * Isso acontece porque já que configuramos o formulário para guardar os dados 
+	 * mesmo quando acontecer erros de validação, dessa forma, ele precisa de um 
+	 * objeto para poder armazenar esses dados e para poder exibir o formulário, 
+	 * mesmo que vazio.
+	 * 
+	 * Para que o objeto do tipo Produto fique disponível em nosso formulário, 
+	 * só precisamos fazer uma pequena alteração em nosso ProdutosController. 
+	 * Em nosso método form() só precisamos colocar que queremos receber como parametro 
+	 * um objeto do tipo Produto. Dessa forma o Spring já deixará este objeto 
+	 * disponível na requisição.
+	 * 
+	 * NOTA: curioso que precisamos somente declarar o objeto e não precisa fazer mais nada.
 	 */
 	@RequestMapping("/form")
-	public ModelAndView form() {
+	public ModelAndView form(Produto produto) {
 
 		/*
 		 * Quando utilizamos o ModelAndView, além retornar uma página, temos a
@@ -139,7 +157,7 @@ public class ProdutosController {
 	public ModelAndView gravar(@Valid Produto produto, BindingResult result, RedirectAttributes redirectAttributes) {
 
 		if (result.hasErrors()) {
-			return form();
+			return form(produto); // enviando o produto para preenchimento no formulário
 		}
 		
 		produtoDAO.gravar(produto);

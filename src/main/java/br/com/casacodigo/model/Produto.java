@@ -1,5 +1,6 @@
 package br.com.casacodigo.model;
 
+import java.util.Calendar;
 import java.util.List;
 
 import javax.persistence.ElementCollection;
@@ -7,6 +8,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+
+import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity
 public class Produto {
@@ -18,6 +21,15 @@ public class Produto {
 	private String titulo;
 	private String descricao;
 	private int paginas;
+	
+	/*
+	 * Irá fazer a conversão da String dd/MM/yyyy para um Calendar
+	 * No caso, estamos usando agora um conversor universal definido em AppWebConfiguration.
+	 * E por isso essa anotação comentada não é mais necessária
+	 */
+	//@DateTimeFormat(pattern = "dd/MM/yyyy")
+	@DateTimeFormat
+	private Calendar dataLancamento;
 
 	/*
 	 * Podemos fazer uma relação de produtos com seus preços em duas tabelas
@@ -78,6 +90,14 @@ public class Produto {
 
 	public void setPrecos(List<Preco> precos) {
 		this.precos = precos;
+	}
+
+	public Calendar getDataLancamento() {
+		return dataLancamento;
+	}
+
+	public void setDataLancamento(Calendar dataLancamento) {
+		this.dataLancamento = dataLancamento;
 	}
 
 	@Override

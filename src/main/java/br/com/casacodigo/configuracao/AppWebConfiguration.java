@@ -1,7 +1,13 @@
 package br.com.casacodigo.configuracao;
 
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.format.datetime.DateFormatter;
+import org.springframework.format.datetime.DateFormatterRegistrar;
+import org.springframework.format.support.DefaultFormattingConversionService;
+import org.springframework.format.support.FormattingConversionService;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
@@ -50,6 +56,33 @@ public class AppWebConfiguration {
 		resolver.setPrefix("/WEB-INF/views/"); // definindo onde as páginas se encontram
 		resolver.setSuffix(".jsp"); // definindo a extensão dos arquivos
 		return resolver;
+	}
+	
+	/*
+	 * Método que carregará nossos arquivos de mensagens.
+	 */
+	@Bean
+	public MessageSource messageSource() {
+		ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+	    messageSource.setBasename("/WEB-INF/messages"); // onde fica nosso arquivo de configuração de mensagens do sistema
+	    messageSource.setDefaultEncoding("UTF-8"); // encoding
+	    messageSource.setCacheSeconds(1); // quantos segundos vai levar para recarregar 
+	    return messageSource;
+	}
+	
+	/*
+	 * Criando um conversor universal para todas as datas do sistema.
+	 * Ou seja, quando realizar o POST de uma data no formato dd/MM/yyyy, esse
+	 * método conseguirá fazer a conversão de um tipo String para um objeto de data.
+	 */
+	@Bean
+	public FormattingConversionService mvcConversionService(){
+	    DefaultFormattingConversionService conversionService = new DefaultFormattingConversionService();
+	    DateFormatterRegistrar formatterRegistrar = new DateFormatterRegistrar();
+	    formatterRegistrar.setFormatter(new DateFormatter("dd/MM/yyyy"));
+	    formatterRegistrar.registerFormatters(conversionService);
+
+	    return conversionService;
 	}
 
 }
