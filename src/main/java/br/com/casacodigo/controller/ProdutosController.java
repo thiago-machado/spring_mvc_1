@@ -11,9 +11,11 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import br.com.casacodigo.infra.FileSaver;
 import br.com.casacodigo.model.Produto;
 import br.com.casacodigo.model.TipoPreco;
 import br.com.casacodigo.model.dao.ProdutoDAO;
@@ -64,31 +66,34 @@ public class ProdutosController {
 	@Autowired
 	private ProdutoDAO produtoDAO;
 
+	
+	 @Autowired
+	 private FileSaver fileSaver;
+	 
 	/*
 	 * Quando acessar casadocodigo/produtos/form, acessa o formulário de cadastro
 	 */
 
 	/*
-	 * @RequestMapping("produtos/form") 
-	 * public String form() { 
-	 * return "produtos/form"; 
-	 * }
+	 * @RequestMapping("produtos/form") public String form() { return
+	 * "produtos/form"; }
 	 */
-	
+
 	/*
-	 * O Spring tenta usar um objeto da classe Produto para poder exibir no formulário. 
-	 * Isso acontece porque já que configuramos o formulário para guardar os dados 
-	 * mesmo quando acontecer erros de validação, dessa forma, ele precisa de um 
-	 * objeto para poder armazenar esses dados e para poder exibir o formulário, 
-	 * mesmo que vazio.
+	 * O Spring tenta usar um objeto da classe Produto para poder exibir no
+	 * formulário. Isso acontece porque já que configuramos o formulário para
+	 * guardar os dados mesmo quando acontecer erros de validação, dessa forma, ele
+	 * precisa de um objeto para poder armazenar esses dados e para poder exibir o
+	 * formulário, mesmo que vazio.
 	 * 
-	 * Para que o objeto do tipo Produto fique disponível em nosso formulário, 
-	 * só precisamos fazer uma pequena alteração em nosso ProdutosController. 
-	 * Em nosso método form() só precisamos colocar que queremos receber como parametro 
-	 * um objeto do tipo Produto. Dessa forma o Spring já deixará este objeto 
+	 * Para que o objeto do tipo Produto fique disponível em nosso formulário, só
+	 * precisamos fazer uma pequena alteração em nosso ProdutosController. Em nosso
+	 * método form() só precisamos colocar que queremos receber como parametro um
+	 * objeto do tipo Produto. Dessa forma o Spring já deixará este objeto
 	 * disponível na requisição.
 	 * 
-	 * NOTA: curioso que precisamos somente declarar o objeto e não precisa fazer mais nada.
+	 * NOTA: curioso que precisamos somente declarar o objeto e não precisa fazer
+	 * mais nada.
 	 */
 	@RequestMapping("/form")
 	public ModelAndView form(Produto produto) {
@@ -152,14 +157,23 @@ public class ProdutosController {
 	 * Note que o BindingResult vem logo após o atributo que está assinado com a
 	 * anotação @Valid, essa ordem não é por acaso, precisa ser desta forma para que
 	 * o Spring consiga fazer as validações da forma correta.
+	 * 
+	 * 
+	 * O Spring enviará nosso arquivo para o ProdutosController como um objeto do
+	 * tipo MultipartFile, que chamaremos de sumario.
 	 */
 	@RequestMapping(method = RequestMethod.POST)
-	public ModelAndView gravar(@Valid Produto produto, BindingResult result, RedirectAttributes redirectAttributes) {
-
+	public ModelAndView gravar(MultipartFile sumario, @Valid Produto produto, BindingResult result,
+			RedirectAttributes redirectAttributes) {
+		
 		if (result.hasErrors()) {
 			return form(produto); // enviando o produto para preenchimento no formulário
 		}
-		
+
+		String path = fileSaver.write("arquivos-sumario", sumario);
+	    produto.setSumarioPath(path);
+	    System.out.println(path);
+	    
 		produtoDAO.gravar(produto);
 
 		redirectAttributes.addFlashAttribute("sucesso", "Produto cadastrado!");

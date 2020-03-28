@@ -19,10 +19,13 @@
 	Para evitar de ficar mexendo na action do formulário, peça para o Spring preencher 
 	a URL para você. Para isso, adicionar a lib ".../tags".
 	-->
-	<form:form action="${s:mvcUrl('PC#gravar').build()}" method="post" commandName="produto">
+	<form:form action="${s:mvcUrl('PC#gravar').build()}" method="post" commandName="produto" 
+		enctype="multipart/form-data">
 		<div>
 			<label>Título</label> 
 			<!--  form:errors path="produto.titulo" / -->
+			<!-- Agora usados form:input para que o Spring possa saber que queremos preencher os inputs com valores caso quisermos.
+			Isso é muito útil em caso de erro no POST. -->
 			<form:errors path="titulo" />
 			<form:input path="titulo" />
 		</div>
@@ -50,6 +53,11 @@
             	<form:hidden path="precos[${status.index}].tipo" value="${tipoPreco}" />
 			</div>
 		</c:forEach>
+		
+		<div>
+		    <label>Sumário</label>
+		    <input name="sumario" type="file" />
+		</div>
 
 		<button type="submit">Cadastrar</button>
 	</form:form>

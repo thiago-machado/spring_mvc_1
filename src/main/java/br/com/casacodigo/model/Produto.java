@@ -21,13 +21,13 @@ public class Produto {
 	private String titulo;
 	private String descricao;
 	private int paginas;
-	
+
 	/*
-	 * Irá fazer a conversão da String dd/MM/yyyy para um Calendar
-	 * No caso, estamos usando agora um conversor universal definido em AppWebConfiguration.
-	 * E por isso essa anotação comentada não é mais necessária
+	 * Irá fazer a conversão da String dd/MM/yyyy para um Calendar No caso, estamos
+	 * usando agora um conversor universal definido em AppWebConfiguration. E por
+	 * isso essa anotação comentada não é mais necessária
 	 */
-	//@DateTimeFormat(pattern = "dd/MM/yyyy")
+	// @DateTimeFormat(pattern = "dd/MM/yyyy")
 	@DateTimeFormat
 	private Calendar dataLancamento;
 
@@ -51,6 +51,17 @@ public class Produto {
 	 */
 	@ElementCollection
 	private List<Preco> precos;
+
+	/*
+	 * Existem várias estratégias para guardar arquivos nas aplicações. Uma delas
+	 * seria guardar o arquivo no banco de dados, mas esta seria muito trabalhosa e
+	 * precisaríamos converter o arquivo para um formato aceito pelo banco,
+	 * geralmente bytes. Outra opção seria guardar nas pastas do sistema de arquivos
+	 * do servidor. Optaremos por esta segunda opção, por isso, o atributo
+	 * sumarioPath é do tipo String. Nele será guardado apenas o caminho (path) do
+	 * arquivo.
+	 */
+	private String sumarioPath;
 
 	public String getTitulo() {
 		return titulo;
@@ -104,4 +115,15 @@ public class Produto {
 	public String toString() {
 		return "Produto [titulo=" + titulo + ", descricao=" + descricao + ", paginas=" + paginas + "]";
 	}
+
+	public String getSumarioPath() {
+		return sumarioPath;
+	}
+
+	public void setSumarioPath(String sumarioPath) {
+		this.sumarioPath = sumarioPath;
+	}
+
+	
+	
 }

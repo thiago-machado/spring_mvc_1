@@ -1,6 +1,8 @@
 package br.com.casacodigo.configuracao;
 
 import javax.servlet.Filter;
+import javax.servlet.MultipartConfigElement;
+import javax.servlet.ServletRegistration.Dynamic;
 
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
@@ -8,7 +10,8 @@ import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatche
 /**
  * Essa classe serve para fazermos as configurações básicas.
  * 
- * Essa é a Servlet do Spring MVC para que ela atenda as requisições recebidas pelo servidor
+ * Essa é a Servlet do Spring MVC para que ela atenda as requisições recebidas
+ * pelo servidor
  * 
  * @author thiag
  *
@@ -22,12 +25,12 @@ public class ServletSpringMVC extends AbstractAnnotationConfigDispatcherServletI
 	}
 
 	/*
-	 * Configuração para que o Spring conheça nosso Controller.
-	 * Estamos difinindo que a classe AppWebConfiguration será usada 
-	 * como classe de configuração do servlet do SpringMVC.
+	 * Configuração para que o Spring conheça nosso Controller. Estamos difinindo
+	 * que a classe AppWebConfiguration será usada como classe de configuração do
+	 * servlet do SpringMVC.
 	 * 
-	 * Estamos também dizendo ao Spring que a classe JPAConfiguracao
-	 * deve ser reconhecida.
+	 * Estamos também dizendo ao Spring que a classe JPAConfiguracao deve ser
+	 * reconhecida.
 	 * 
 	 */
 	@Override
@@ -44,9 +47,9 @@ public class ServletSpringMVC extends AbstractAnnotationConfigDispatcherServletI
 		/*
 		 * Estamos definindo que queremos mapear do "/" em diante
 		 */
-		return new String[] {"/"};
+		return new String[] { "/" };
 	}
-	
+
 	/*
 	 * Definindo o UFT-8 para toda a aplicação
 	 */
@@ -55,6 +58,19 @@ public class ServletSpringMVC extends AbstractAnnotationConfigDispatcherServletI
 		CharacterEncodingFilter encoding = new CharacterEncodingFilter();
 		encoding.setEncoding("UTF-8");
 		return new Filter[] { encoding };
+	}
+
+	/*
+	 * Iremos sobrescrever um método chamado customizeRegistration que recebe um
+	 * objeto do tipo Dynamic que chamaremos de registration. Neste objeto, usaremos
+	 * o método setMultipartConfig que requer um objeto do tipo
+	 * MultipartConfigElement. O MultipartConfigElement espera receber uma String
+	 * que configure o arquivo. Não usaremos nenhuma configuração para o arquivo,
+	 * queremos receber este do jeito que vier. Passamos então uma String vazia.
+	 */
+	@Override
+	protected void customizeRegistration(Dynamic registration) {
+		registration.setMultipartConfig(new MultipartConfigElement(""));
 	}
 
 }
