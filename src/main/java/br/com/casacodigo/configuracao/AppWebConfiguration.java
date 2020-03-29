@@ -10,28 +10,43 @@ import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
+import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import br.com.casacodigo.controller.HomeController;
 import br.com.casacodigo.infra.FileSaver;
+import br.com.casacodigo.model.CarrinhoCompras;
 import br.com.casacodigo.model.dao.ProdutoDAO;
 
-/*
+/**
  * @EnableWebMvc = estamos utilizando a parte WEB MVC do Spring
  * 
- * @ComponentScan = definindo quais são os Controllers. Para definirmos os 
- * Controllers, podemos fazer de uma das duas formas:
- * 1) (basePackages = "pacote")
- * 2) (basePackageClasses = MinhaClasseController.class)
+ * @ComponentScan = definindo quais são os Controllers. Para definirmos os
+ *                Controllers, podemos fazer de uma das duas formas: 1)
+ *                (basePackages = "pacote") 2) (basePackageClasses =
+ *                MinhaClasseController.class)
  * 
- * ProdutoDAO foi inserido para que o Spring reconheça as injeções do pacote dao
+ *                ProdutoDAO foi inserido para que o Spring reconheça as
+ *                injeções do pacote dao
+ * 
+ * 
+ * 
+ *                Por padrão, o Spring MVC nega o acesso à pasta resources.
+ *                Consequentemente, o Tomcat não pode carregar os arquivos CSS.
+ *                Para liberar o acesso, é preciso fazer duas alterações na
+ *                classe AppWebConfiguration:
+ * 
+ *                1) a classe deve estender de WebMvcConfigurerAdapter; 2) deve
+ *                implementar o método configureDefaultServletHandling para
+ *                liberar o acesso;
  */
 
 //O Spring vai pegar o pacote HomeController para fazer o mapeamento do Controller
 @EnableWebMvc
-@ComponentScan(basePackageClasses = { HomeController.class, ProdutoDAO.class, FileSaver.class })
-public class AppWebConfiguration {
+@ComponentScan(basePackageClasses = { HomeController.class, ProdutoDAO.class, FileSaver.class, CarrinhoCompras.class })
+public class AppWebConfiguration extends WebMvcConfigurerAdapter {
 
 	/*
 	 * Sobre a pasta WEB-INF:
@@ -58,6 +73,23 @@ public class AppWebConfiguration {
 		InternalResourceViewResolver resolver = new InternalResourceViewResolver();
 		resolver.setPrefix("/WEB-INF/views/"); // definindo onde as páginas se encontram
 		resolver.setSuffix(".jsp"); // definindo a extensão dos arquivos
+
+		/*
+		 * Essa anotação indica que a classe será tratada como um Bean do Spring. Para
+		 * que possamos acessar esse Bean em nossas view, precisaremos adicionar uma
+		 * configuração na classe WebAppConfiguration. No método
+		 * InternalResourceViewResolver poderiamos usar o método
+		 * setExposeContextBeansAsAttributes do objeto resolver com o valor true, mas
+		 * esta configuração tornará todos os Beans da aplicação disponíveis, o que
+		 * parece não ser uma boa ideia.
+		 * 
+		 * Ao invés disso, usaremos o método setExposedContextBeanNames deste mesmo
+		 * objeto. Este método nos permite dizer qual *Bean estará disponível para a
+		 * view. Os nomes dos Beans seguem um padrão bem simples. O padrão é o nome da
+		 * classe com sua primeira em minúsculo, ou seja, a classe CarrinhoCompras fica
+		 * carrinhoCompras.
+		 */
+		resolver.setExposedContextBeanNames("carrinhoCompras");
 		return resolver;
 	}
 
@@ -102,6 +134,14 @@ public class AppWebConfiguration {
 	@Bean
 	public MultipartResolver multipartResolver() {
 		return new StandardServletMultipartResolver();
+	}
+
+	/*
+	 * Libera o acesso aos arquivos CSS, JS e etc
+	 */
+	@Override
+	public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
+		configurer.enable();
 	}
 
 }

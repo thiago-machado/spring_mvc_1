@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.multipart.MultipartFile;
@@ -66,10 +67,9 @@ public class ProdutosController {
 	@Autowired
 	private ProdutoDAO produtoDAO;
 
-	
-	 @Autowired
-	 private FileSaver fileSaver;
-	 
+	@Autowired
+	private FileSaver fileSaver;
+
 	/*
 	 * Quando acessar casadocodigo/produtos/form, acessa o formulário de cadastro
 	 */
@@ -165,15 +165,15 @@ public class ProdutosController {
 	@RequestMapping(method = RequestMethod.POST)
 	public ModelAndView gravar(MultipartFile sumario, @Valid Produto produto, BindingResult result,
 			RedirectAttributes redirectAttributes) {
-		
+
 		if (result.hasErrors()) {
 			return form(produto); // enviando o produto para preenchimento no formulário
 		}
 
 		String path = fileSaver.write("arquivos-sumario", sumario);
-	    produto.setSumarioPath(path);
-	    System.out.println(path);
-	    
+		produto.setSumarioPath(path);
+		System.out.println(path);
+
 		produtoDAO.gravar(produto);
 
 		redirectAttributes.addFlashAttribute("sucesso", "Produto cadastrado!");
@@ -196,6 +196,33 @@ public class ProdutosController {
 		List<Produto> produtos = produtoDAO.listar();
 		ModelAndView modelAndView = new ModelAndView("/produtos/lista");
 		modelAndView.addObject("produtos", produtos);
+		return modelAndView;
+	}
+
+	/*
+	 * Antes, nossa URL ficava assim:
+	 * http://localhost:8080/casadocodigo/produtos/detalhe?id=2
+	 * 
+	 * Vamos deixá-la assim: http://localhost:8080/casadocodigo/produtos/detalhe/2
+	 * 
+	 * Para isso, precisamos mudar a assinatura do método detalhe em nosso
+	 * ProdutosController. Ela precisa receber o parâmetro separado pela barra (/).
+	 * A anotação @RequestMapping permite que façamos isso.
+	 * 
+	 * Apenas isto não é o suficient! Precisaremos indicar para o método
+	 * detalhe que o parâmetro id será recuperado do caminho da url. Então, usaremos
+	 * uma nova anotação: @PathVariable passando o id desta
+	 * forma: @PathVariable("id").
+	 * 
+	 * Obs.: o tipo enviado pela página deve ser o mesmo dentro do método que o está recebendo.
+	 * Ou seja, se estou enviando um Long pela página JSP, no método o tipo também 
+	 * deve ser um Long.
+	 */
+	@RequestMapping("/detalhe/{id}")
+	public ModelAndView detalhe(@PathVariable("id") Long id) {
+		ModelAndView modelAndView = new ModelAndView("/produtos/detalhe");
+		Produto produto = produtoDAO.find(id);
+		modelAndView.addObject("produto", produto);
 		return modelAndView;
 	}
 }
