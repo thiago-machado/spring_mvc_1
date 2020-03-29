@@ -1,5 +1,6 @@
 package br.com.casacodigo.model;
 
+import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.List;
 
@@ -125,7 +126,16 @@ public class Produto {
 	}
 
 	/*
-	 * Estes dois métodos foram criados somente para utilização no Carrinho de Compras
+	 * Neste método, precisaremos filtrar de todos os preços, o preco escolhido e
+	 * logo após encontra-lo retornar seu valor através do método getvalor().
+	 */
+	public BigDecimal precoPara(TipoPreco tipoPreco) {
+		return precos.stream().filter(preco -> preco.getTipo().equals(tipoPreco)).findFirst().get().getValor();
+	}
+
+	/*
+	 * Estes dois métodos foram criados somente para utilização no Carrinho de
+	 * Compras
 	 */
 	@Override
 	public int hashCode() {
@@ -148,5 +158,5 @@ public class Produto {
 			return false;
 		return true;
 	}
-	
+
 }
