@@ -1,5 +1,12 @@
 package br.com.casacodigo.configuracao;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.guava.GuavaCacheManager;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -8,13 +15,18 @@ import org.springframework.format.datetime.DateFormatter;
 import org.springframework.format.datetime.DateFormatterRegistrar;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
+import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
+import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.view.ContentNegotiatingViewResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
+
+import com.google.common.cache.CacheBuilder;
 
 import br.com.casacodigo.controller.HomeController;
 import br.com.casacodigo.infra.FileSaver;
@@ -47,6 +59,7 @@ import br.com.casacodigo.model.dao.ProdutoDAO;
 //O Spring vai pegar o pacote HomeController para fazer o mapeamento do Controller
 @EnableWebMvc
 @ComponentScan(basePackageClasses = { HomeController.class, ProdutoDAO.class, FileSaver.class, CarrinhoCompras.class })
+@EnableCaching
 public class AppWebConfiguration extends WebMvcConfigurerAdapter {
 
 	/*
@@ -154,6 +167,53 @@ public class AppWebConfiguration extends WebMvcConfigurerAdapter {
 	@Bean
 	public RestTemplate restTemplate() {
 		return new RestTemplate();
+	}
+
+	@Bean
+	public CacheManager cacheManager() {
+
+		/*
+		 * A documentação recomenda o uso do Guava, um framework de cache fornecido pelo
+		 * Google.
+		 * 
+		 * Criando um CacheBuilder que aceita até 100 elementos e onde seu tempo de vida
+		 * é de 5 mintos
+		 */
+		CacheBuilder<Object, Object> builder = CacheBuilder.newBuilder().maximumSize(100).expireAfterAccess(5,
+				TimeUnit.MINUTES);
+		GuavaCacheManager manager = new GuavaCacheManager();
+		manager.setCacheBuilder(builder);
+		return manager;
+		// return new ConcurrentMapCacheManager(); // deve ser usado somente para
+		// desenvolvimento
+	}
+
+	/*
+	 * Desenvolveu-se no mercado um padrão que provê uma negociação do conteúdo
+	 * retornado pela aplicação. Através da técnica chamada de Content Negotiation é
+	 * possível que uma mesma URL retorne as informações em formatos diferentes.
+	 * Exemplo: acessar a URL localhost:8080/casadocodigo/produtos/5 traria como
+	 * resposta o HTML da página de detalhes daquele produto, enquanto acessar
+	 * localhost:8080/casadocodigo/produtos/5.json retornaria o JSON que representa
+	 * aquele produto.
+	 * 
+	 * Perceba que a URL não muda, mas sua extensão, sim.
+	 * 
+	 * Com a configuração abaixo, apesar de não aparentar, nossa aplicação inteira
+	 * já pode ser lida em dois formatos, JSON e HTML.
+	 */
+	@Bean
+	public ViewResolver contentNegotiationViewResolver(ContentNegotiationManager manager) {
+
+		List<ViewResolver> viewResolvers = new ArrayList<>();
+		viewResolvers.add(internalResourceViewResolver()); // resolvedor de HTML
+		viewResolvers.add(new JsonViewResolver()); // resolvedor de JSON
+
+		ContentNegotiatingViewResolver resolver = new ContentNegotiatingViewResolver();
+		resolver.setViewResolvers(viewResolvers);
+		resolver.setContentNegotiationManager(manager);
+
+		return resolver;
 	}
 
 }

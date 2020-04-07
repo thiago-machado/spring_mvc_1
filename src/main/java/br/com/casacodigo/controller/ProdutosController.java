@@ -5,6 +5,7 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -163,6 +165,7 @@ public class ProdutosController {
 	 * tipo MultipartFile, que chamaremos de sumario.
 	 */
 	@RequestMapping(method = RequestMethod.POST)
+	@CacheEvict(value="produtoHome", allEntries=true) // limpando o cache "produtoHome" por inteiro (allEntries)
 	public ModelAndView gravar(MultipartFile sumario, @Valid Produto produto, BindingResult result,
 			RedirectAttributes redirectAttributes) {
 
@@ -205,6 +208,18 @@ public class ProdutosController {
 	 * 
 	 * Vamos deixá-la assim: http://localhost:8080/casadocodigo/produtos/detalhe/2
 	 * 
+	 * ******************************************************************************
+	 * 
+	 * Se chamarmos: http://localhost:8080/casadocodigo/produtos/detalhe/2
+	 * Abrirá a página HTML
+	 * 
+	 * Se chamarmos: http://localhost:8080/casadocodigo/produtos/detalhe/2.json
+	 * Retornará o JSON
+	 * Isso é possível através do método que criamos em AppWebConfiguration chamado 
+	 * contentNegotiationViewResolver(...)
+	 * 
+	 * ******************************************************************************
+	 * 
 	 * Para isso, precisamos mudar a assinatura do método detalhe em nosso
 	 * ProdutosController. Ela precisa receber o parâmetro separado pela barra (/).
 	 * A anotação @RequestMapping permite que façamos isso.
@@ -224,5 +239,22 @@ public class ProdutosController {
 		Produto produto = produtoDAO.find(id);
 		modelAndView.addObject("produto", produto);
 		return modelAndView;
+	}
+	
+	/*
+	 * Essa chamada retornará um JSON de um produto
+	 * @ResponseBody = para que o Spring consiga responder a requisição da forma que queremos neste caso, 
+	 * usaremos a anotação ResponseBody.
+	 * 
+	 * É importante notar que só funcionou, porque o Jackson está configurado no projeto. 
+	 * Se não tivéssemos configurado a biblioteca anteriormente no primeiro módulo do curso, o 
+	 * recurso não teria funcionado. Teríamos problema também, caso mais de uma biblioteca estivesse 
+	 * configurada para transformar objetos em JSON, no projeto. Haveria conflito e teríamos que realizar 
+	 * novas configurações para obter o mesmo resultado.
+	 */
+	@RequestMapping("/{id}")
+	@ResponseBody
+	public Produto detalheJSON(@PathVariable("id") Integer id){
+	    return produtoDAO.find(id);
 	}
 }
