@@ -2,6 +2,11 @@
 	pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="s"%>
+
+<!-- taglib para trabalhar com segurança -->
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="security" %>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,20 +15,34 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 <meta name="viewport"
 	content="width=device-width, initial-scale=1, maximum-scale=1" />
-<link rel="icon" href="//cdn.shopify.com/s/files/1/0155/7645/t/177/assets/favicon.ico?11981592617154272979" type="image/ico" />
-<link href="https://plus.googlecom/108540024862647200608" rel="publisher" />
+<link rel="icon"
+	href="//cdn.shopify.com/s/files/1/0155/7645/t/177/assets/favicon.ico?11981592617154272979"
+	type="image/ico" />
+<link href="https://plus.googlecom/108540024862647200608"
+	rel="publisher" />
 <title>${ produto.titulo }</title>
-<link href="${contextPath}resources/css/cssbase-min.css" rel="stylesheet" type="text/css" media="all" />
-<link href='http://fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' />
-<link href="${contextPath}resources/css/fonts.css" rel="stylesheet" type="text/css" media="all" />
-<link href="${contextPath}resources/css/fontello-ie7.css" rel="stylesheet" type="text/css" media="all" />
-<link href="${contextPath}resources/css/fontello-embedded.css" rel="stylesheet" type="text/css" media="all" />
-<link href="${contextPath}resources/css/fontello.css" rel="stylesheet" type="text/css" media="all" />
-<link href="${contextPath}resources/css/style.css" rel="stylesheet" type="text/css" media="all" />
-<link href="${contextPath}resources/css/layout-colors.css" rel="stylesheet" type="text/css" media="all" />
-<link href="${contextPath}resources/css/responsive-style.css" rel="stylesheet" type="text/css" media="all" />
-<link href="${contextPath}resources/css/guia-do-programador-style.css" rel="stylesheet" type="text/css" media="all" />
-<link href="${contextPath}resources/css/produtos.css" rel="stylesheet" type="text/css" media="all" />
+<link href="${contextPath}resources/css/cssbase-min.css"
+	rel="stylesheet" type="text/css" media="all" />
+<link href='http://fonts.googleapis.com/css?family=Droid+Sans:400,700'
+	rel='stylesheet' />
+<link href="${contextPath}resources/css/fonts.css" rel="stylesheet"
+	type="text/css" media="all" />
+<link href="${contextPath}resources/css/fontello-ie7.css"
+	rel="stylesheet" type="text/css" media="all" />
+<link href="${contextPath}resources/css/fontello-embedded.css"
+	rel="stylesheet" type="text/css" media="all" />
+<link href="${contextPath}resources/css/fontello.css" rel="stylesheet"
+	type="text/css" media="all" />
+<link href="${contextPath}resources/css/style.css" rel="stylesheet"
+	type="text/css" media="all" />
+<link href="${contextPath}resources/css/layout-colors.css"
+	rel="stylesheet" type="text/css" media="all" />
+<link href="${contextPath}resources/css/responsive-style.css"
+	rel="stylesheet" type="text/css" media="all" />
+<link href="${contextPath}resources/css/guia-do-programador-style.css"
+	rel="stylesheet" type="text/css" media="all" />
+<link href="${contextPath}resources/css/produtos.css" rel="stylesheet"
+	type="text/css" media="all" />
 <link rel="canonical" href="http://www.casadocodigo.com.br/" />
 
 </head>
@@ -31,18 +50,20 @@
 
 	<header id="layout-header">
 		<div class="clearfix container">
-			<a href="/" id="logo"> </a>
+			<a href="${contextPath}" id="logo"> </a>
 			<div id="header-content">
 				<nav id="main-nav">
 
 					<ul class="clearfix">
 						<li><a href="/carrinho" rel="nofollow">Carrinho (${ carrinhoCompras.quantidade })</a></li>
-
-						<li><a href="/pages/sobre-a-casa-do-codigo" rel="nofollow">Sobre
-								Nós</a></li>
-
-						<li><a href="/pages/perguntas-frequentes" rel="nofollow">Perguntas
-								Frequentes</a></li>
+						
+						<security:authorize access="hasRole('ROLE_ADMIN')">
+							<li><a href="${contextPath}produtos" rel="nofollow">Listagem de Produtos</a></li>
+							<li><a href="${contextPath}produtos/form" rel="nofollow">Cadastro de Produtos</a></li>
+						</security:authorize>
+						
+						<!-- li><a href="/cart" rel="nofollow">Carrinho</a></li -->
+						<li><a href="/pages/sobre-a-casa-do-codigo" rel="nofollow">Sobre Nós</a></li>
 					</ul>
 				</nav>
 			</div>
@@ -84,20 +105,35 @@
 
 
 		<section class="buy-options clearfix">
-			<form action='<c:url value="/carrinho/add" />' method="post" class="container">
+			<form action='<c:url value="/carrinho/add" />' method="post"
+				class="container">
 				<input type="hidden" name="produtoId" value="${ produto.id }" />
 				<ul id="variants" class="clearfix">
 					<c:forEach items="${ produto.precos }" var="preco">
 						<li class="buy-option">
-							<input type="radio" name="tipo" class="variant-radio" id="tipo" 
-							value="${ preco.tipo }" checked="checked" /> 
-							<label class="variant-label">${ preco.tipo }</label> 
+							<input type="radio" name="tipo" class="variant-radio" id="tipo" value="${ preco.tipo }" checked="checked" />
+							<label class="variant-label">${ preco.tipo }</label>
 							<small class="compare-at-price">R$ 39,90</small>
 							<p class="variant-price">${ preco.valor }</p>
 						</li>
 					</c:forEach>
 				</ul>
-				<button type="submit" class="submit-image icon-basket-alt" alt="Compre Agora" title="Compre Agora"></button>
+				<button type="submit" class="submit-image icon-basket-alt"
+					alt="Compre Agora" title="Compre Agora"></button>
+					
+				<!-- CSRF é uma sigla que representa a frase Cross Site Request Forgery, uma técnica de ataque 
+				a sites muito comum na web. A técnica representa o cenário de que um outro site está enviando 
+				dados para nossa aplicação, em vez do usuário diretamente. Geralmente, acontece com páginas 
+				clonadas, uma página falsa é apresentada ao usuário e este sem saber submete seus dados que 
+				por sua vez podem ser enviados ao servidor original ou podem ser feitas cópias em um servidor 
+				falso para posteriormente ter o uso indevido. -->
+				
+				<!-- A solução mais simples para esse caso é criar o input hidden abaixo. -->
+				
+				<!-- Outra forma é criar a tag form:form, como na página de cadastro de produtos.
+				Criar essa tag não necessitará criar o input hiden abaixo, pois o Spring criará o 
+				input de forma automática. -->
+				<input type="hidden" name="${_csrf.parameterName }" value="${_csrf.token }" />
 			</form>
 
 		</section>
@@ -113,9 +149,18 @@
 
 			<section class="data product-detail">
 				<h2 class="section-title">Dados do livro:</h2>
-				<p>Número de páginas: <span>${ produto.paginas }</span></p>
-				<p>Data de publicação: <fmt:formatDate pattern="dd/MM/yyyy" value="${ produto.dataLancamento.time }" /></p>
-				<p>Encontrou um erro? <a href='/submissao-errata' target='_blank'>Submeta uma errata</a></p>
+				<p>
+					Número de páginas: <span>${ produto.paginas }</span>
+				</p>
+				<p>
+					Data de publicação:
+					<fmt:formatDate pattern="dd/MM/yyyy"
+						value="${ produto.dataLancamento.time }" />
+				</p>
+				<p>
+					Encontrou um erro? <a href='/submissao-errata' target='_blank'>Submeta
+						uma errata</a>
+				</p>
 			</section>
 		</div>
 

@@ -32,11 +32,11 @@
 
 	<header id="layout-header">
 		<div class="clearfix container">
-			<a href="/" id="logo"> </a>
+			<a href="${contextPath}produtos" id="logo"> </a>
 			<div id="header-content">
 				<nav id="main-nav">
 					<ul class="clearfix">
-						<li><a href="${s:mvcUrl('CCC#itens').build()}" rel="nofollow">Carrinho (${ carrinhoCompras.quantidade })</a></li>
+						<li><a href="${contextPath}/itens" rel="nofollow">Carrinho (${ carrinhoCompras.quantidade })</a></li>
 						<li><a href="/pages/sobre-a-casa-do-codigo" rel="nofollow">Sobre Nós</a></li>
 						<li><a href="/pages/perguntas-frequentes" rel="nofollow">Perguntas Frequentes</a></li>
 					</ul>
@@ -92,9 +92,9 @@
 						<td class="numeric-cell">${ carrinhoCompras.getTotal(item) }</td>
 						<td class="remove-item">
 							<!-- passando mais de um parametro para o metodo remover de CarrinhoComprasController -->
-							<form action="${s:mvcUrl('CCC#remover').arg(0, item.produto.id).arg(1,item.tipoPreco).build() }" method="post">
+							<form action="${contextPath}carrinho/remover?produtoId=${item.produto.id}&tipoPreco=${item.tipoPreco}" method="post">
 								<input type="image" src="${contextPath }/resources/imagens/excluir.png" 
-									alt="Excluir" title="Excluir" />
+									alt="Excluir" title="Remover" />
 							</form>	
 						</td>
 					</tr>
@@ -104,7 +104,7 @@
 				<tr>
 					<td colspan="3">
 					
-					<form action="${s:mvcUrl('PC#finalizar').build()}" method="post">
+					<form action="${contextPath}pagamento/finalizar" method="post">
     					<input type="submit" class="checkout" name="checkout" value="Finalizar compra" />
 					</form>
 					<td class="numeric-cell">${ carrinhoCompras.total }</td>
