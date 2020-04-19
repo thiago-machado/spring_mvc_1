@@ -1,6 +1,7 @@
 package br.com.casacodigo.model;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -97,6 +98,8 @@ public class Produto {
 	}
 
 	public List<Preco> getPrecos() {
+		if(precos == null)
+			precos = new ArrayList<Preco>();
 		return precos;
 	}
 

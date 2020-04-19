@@ -2,8 +2,11 @@ package br.com.casacodigo.configuracao;
 
 import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration.Dynamic;
 
+import org.springframework.web.context.request.RequestContextListener;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
@@ -34,7 +37,7 @@ public class ServletSpringMVC extends AbstractAnnotationConfigDispatcherServletI
 	 */
 	@Override
 	protected Class<?>[] getServletConfigClasses() {
-		return new Class[] { };
+		return new Class[] {};
 	}
 
 	/*
@@ -70,6 +73,30 @@ public class ServletSpringMVC extends AbstractAnnotationConfigDispatcherServletI
 	@Override
 	protected void customizeRegistration(Dynamic registration) {
 		registration.setMultipartConfig(new MultipartConfigElement(""));
+	}
+
+	/*
+	 * Como separamos as configurações de DataSource da aplicação com Profiles, o
+	 * Spring não consegue saber qual configuração usar e assim não usa nenhuma,
+	 * causando o erro.
+	 * 
+	 * Para que possamos definir qual configuração de DataSource o Spring deve usar
+	 * ao inicializar a aplicação, precisaremos de um ouvinte de contexto, que ao
+	 * perceber a inicialização da aplicação, defina que o profile a ser utilizado
+	 * será o de "dev".
+	 * 
+	 * Para isso usaremos um novo método na classe ServletSpringMVC que faz a
+	 * inicilização do Spring. Este método se chama onStartup e recebe um objeto do
+	 * tipo ServletContext com o qual, através do método addListeners adicionaremos
+	 * um ouvinte de contexto de requisição, objeto da classe RequestContextListener
+	 * e por meio do método setInitParameter definiremos o parametro que define o
+	 * Profile da aplicação com o valor "dev".
+	 */
+	@Override
+	public void onStartup(ServletContext servletContext) throws ServletException {
+		super.onStartup(servletContext);
+		servletContext.addListener(new RequestContextListener());
+		servletContext.setInitParameter("spring.profiles.active", "dev");
 	}
 
 }
