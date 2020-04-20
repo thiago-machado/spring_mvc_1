@@ -60,6 +60,18 @@ public class ServletSpringMVC extends AbstractAnnotationConfigDispatcherServletI
 		CharacterEncodingFilter encoding = new CharacterEncodingFilter();
 		encoding.setEncoding("UTF-8");
 		return new Filter[] { encoding };
+
+		/*
+		 * OpenEntityManagerInViewFilter mantém a sessão com o banco de dados até que a
+		 * visualização da página seja carregada.
+		 * 
+		 * Isso resolve o problema do Lazy Inicialization, quando queremos, por exemplo,
+		 * carregar a lista de produtos e seus preços. IMPORTANTE: o mau disso é que
+		 * para cada linha de produto, um SELECT será feito para pegar os preços.
+		 * Resolver usando JOIN FETCH é a melhor maneira, pois realiza-se apenas um
+		 * SELECT para pegar tanto os produtos quanto os preços.
+		 */
+		// return new Filter[] {encodingFilter, new OpenEntityManagerInViewFilter()};
 	}
 
 	/*

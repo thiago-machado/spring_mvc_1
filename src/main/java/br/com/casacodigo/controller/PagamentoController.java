@@ -3,6 +3,9 @@ package br.com.casacodigo.controller;
 import java.util.concurrent.Callable;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.MailSender;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -13,6 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import br.com.casacodigo.model.CarrinhoCompras;
 import br.com.casacodigo.model.DadosPagamento;
+import br.com.casacodigo.model.Usuario;
 
 @RequestMapping("/pagamento")
 @Controller
@@ -23,6 +27,9 @@ public class PagamentoController {
 
 	@Autowired
 	RestTemplate restTemplate;
+
+	@Autowired
+	private MailSender sender;
 
 	/*
 	 * O Spring nos disponibiliza uma classe com a qual podemos fazer as requisições
@@ -55,7 +62,7 @@ public class PagamentoController {
 	 * método, de nome call.
 	 */
 	@RequestMapping(value = "/finalizar", method = RequestMethod.POST)
-	public Callable<ModelAndView> finalizar(RedirectAttributes model) {
+	public Callable<ModelAndView> finalizar(@AuthenticationPrincipal Usuario usuario, RedirectAttributes model) {
 
 		return () -> {
 			try {
@@ -70,7 +77,38 @@ public class PagamentoController {
 				ex.printStackTrace();
 			}
 
+			enviaEmailCompraProduto(usuario);
 			return new ModelAndView("redirect:/produtos");
 		};
+	}
+
+	/*
+	 * Note que estamos querendo enviar um email para o usuário que fez a compra e
+	 * não estamos capturando este usuário de lugar algum. O método
+	 * enviaEmailCompraProduto precisa saber para quem o email será enviado.
+	 * 
+	 * O Spring Security consegue nos passar este usuário com a
+	 * anotação @AuthenticationPrincipal (ver o método acima). Desta forma, podemos
+	 * adicionar um novo parâmetro (Usuario) no método finalizar anotado com esta
+	 * anotação, e após isso, passar este usuário para o método
+	 * enviaEmailCompraProduto.
+	 * 
+	 * Usaremos um "enviador de emails" do Spring: o EmailSender. Assim, criaremos
+	 * um novo atributo do tipo EmailSender, anotaremos este com @Autowired e o
+	 * chamaremos de sender. Ao final do método enviaEmailCompraProduto usaremos
+	 * este objeto para enviar o email com o método send.
+	 * 
+	 * Na classe AppWebConfiguration, defineremos um @Bean para o MailSender.
+	 * 
+	 */
+	private void enviaEmailCompraProduto(Usuario usuario) {
+		SimpleMailMessage email = new SimpleMailMessage();
+		email.setSubject("Compra finalizada com sucesso");
+		// email.setTo(usuario.getEmail());
+		email.setTo("ti-thiago@outlook.com");
+		email.setText("Compra aprovada com sucesso no valor de " + carrinho.getTotal());
+		email.setFrom("machado.priest@gmail.com");
+
+		sender.send(email);
 	}
 }

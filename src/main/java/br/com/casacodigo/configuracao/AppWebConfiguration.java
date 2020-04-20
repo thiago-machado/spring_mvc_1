@@ -2,6 +2,7 @@ package br.com.casacodigo.configuracao;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.cache.CacheManager;
@@ -15,6 +16,8 @@ import org.springframework.format.datetime.DateFormatter;
 import org.springframework.format.datetime.DateFormatterRegistrar;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
+import org.springframework.mail.MailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartResolver;
@@ -251,6 +254,36 @@ public class AppWebConfiguration extends WebMvcConfigurerAdapter {
 	@Bean
 	public LocaleResolver localeResolver() {
 		return new CookieLocaleResolver();
+	}
+
+	/*
+	 * A classe que implementa a interface MailSender é a JavaMailSenderImpl e será
+	 * através do objeto desta classe que iremos configurar todo o acesso ao
+	 * servidor de emails.
+	 * 
+	 * Por último, precisaremos adicionar como dependência do nosso projeto a
+	 * biblioteca do Java Mail, pois sem esta, o envio de email simplesmente não irá
+	 * funcionar.
+	 * 
+	 * O Spring utiliza o JavaMail internamente, pois ele próprio não possui a
+	 * implementação de como enviar e-mail. Ele apenas criou uma forma simples para
+	 * nós usarmos, e ele próprio realiza o envio através da biblioteca JavaMail.
+	 */
+	@Bean
+	public MailSender mailSender() {
+		JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+
+		mailSender.setHost("smtp.gmail.com");
+		mailSender.setUsername("machado.priest@gmail.com");
+		mailSender.setPassword("killers81");
+		mailSender.setPort(587);
+
+		Properties mailProperties = new Properties();
+		mailProperties.put("mail.smtp.auth", true);
+		mailProperties.put("mail.smtp.starttls.enable", true);
+
+		mailSender.setJavaMailProperties(mailProperties);
+		return mailSender;
 	}
 
 }
